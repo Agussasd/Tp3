@@ -1,0 +1,5 @@
+listar_operaciones
+camino_mas rapido,San Diego,New York
+camino_mas barato,San Diego,New York
+camino_escalas San Diego,New York
+itinerario itinerario_ejemplo.csv
