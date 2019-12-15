@@ -1,18 +1,39 @@
 import csv
 import sys
 from grafo import Grafo
-from biblioteca import dijkstra, bfs, centralidad_biblioteca
+from biblioteca import dijkstra, bfs, centralidad_biblioteca, mst_prim, orden_topologico
+from heapq import heapify, heappush, heappop #Heappush encola, heappop desencola del heap
+
+#peso = [int(tiempo_promedio), int(precio), int(cant_vuelos)]
+
 
 """Terminado hasta ahora: camino_mas 🟌
 						  camino_escalas 🟌
 						  itinerario 🟌🟌
 						  centralidad 🟌🟌🟌 (Falla)
+						  nueva_aerolinea 🟌🟌
 """
 
 #aeropuertos.csv formato: ciudad,codigo_aeropuerto,latitud,longitud
 #vuelos.csv formato aeropuerto_i,aeropuerto_j,tiempo_promedio,precio,cant_vuelos_entre_aeropuertos
 
-COMANDOS = ["listar_operaciones", "camino_mas", "camino_escalas", "centralidad", "itinerario"]
+COMANDOS = ["listar_operaciones", "camino_mas", "camino_escalas", "centralidad", "itinerario", "nueva_aerolinea"]
+
+
+def nueva_aerolinea(vuelos, archivo):
+	"""Recibe los vuelos y un archivo a escribir y debe devolver un archivo nuevo con una aerolinea que conecte a todos los aeropuertos con el minimo costo (peso)"""
+	mst = mst_prim(vuelos) #Necesito un arbol de tendido minimo porque me piden que el peso tiene que ser el minimo posible
+	with open(archivo, "w") as archivo:
+		visitados = []
+		for v in mst:
+			visitados.append(v)
+			for w in mst.adyacentes(v):
+				if w in visitados:
+					continue
+				tiempo_promedio, precio, cant_vuelos = mst.peso(v, w)
+				linea = ",".join([v, w, str(tiempo_promedio), str(precio), str(cant_vuelos)])
+				archivo.write(linea + "\n")
+	print("OK")
 
 def itinerario(aeropuertos, vuelos, archivo):
 	"""Imprime el orden en el que deben visitarse las ciudades que se pasan como archivo, y el camino minimo en tiempo"""
@@ -110,6 +131,8 @@ def procesar_comandos(comandos, parametros, aeropuertos, vuelos):
 		return centralidad(vuelos, parametros[0])
 	if comandos[0] == "itinerario":
 		return itinerario(aeropuertos, vuelos, parametros[0])
+	if comandos[0] == "nueva_aerolinea":
+		return nueva_aerolinea(vuelos, parametros[0])
 
 def main():
 	aeropuertos = procesar_aeropuertos()
@@ -120,4 +143,5 @@ def main():
 			listar_operaciones()
 		parametros = " ".join(comandos[1:]).split(",")
 		procesar_comandos(comandos, parametros, aeropuertos, vuelos)
+
 main()
