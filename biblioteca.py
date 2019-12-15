@@ -6,6 +6,28 @@ from tdas import Pila
 
 INFINITO = float("inf")
 
+def mst_prim(grafo):
+	"""Recibe un grafo y devuelve un arbol de tendido minimo"""
+	v = grafo.vertice_random()
+	visitados = set()
+	visitados.add(v)
+	q = []
+	mst = Grafo(True)
+	for u in grafo:
+		mst.agregar_vertice(u)
+	for w in grafo.adyacentes(v):
+		heappush(q, ((grafo.peso(v, w)), v, w))
+	while len(q) > 0:
+		peso, v, w = heappop(q)
+		if w in visitados:
+			continue
+		mst.agregar_arista(v, w, grafo.peso(v, w))
+		visitados.add(w)
+		for x in grafo.adyacentes(w):
+			if x not in visitados:
+				heappush(q, ((grafo.peso(w, x)), w, x))
+	return mst
+
 def pila_a_lista(pila):
 	lista = []
 	while not pila.esta_vacia():
@@ -91,3 +113,4 @@ def dijkstra(grafo, origen, destino, peso):
 				padre[w] = v
 				heappush(q, (dist[w], w))
 	return dist, padre
+
