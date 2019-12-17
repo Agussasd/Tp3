@@ -1,23 +1,37 @@
+#!/usr/bin/python3
+
 import csv
 import sys
 from grafo import Grafo
-from biblioteca import dijkstra, bfs, centralidad_biblioteca, mst_prim, orden_topologico, random_walk
+from biblioteca import dijkstra, bfs,  mst_prim, orden_topologico, random_walk, ciclo_vacaciones
 
 #peso = [int(tiempo_promedio), int(precio), int(cant_vuelos)]
-
 
 """Terminado hasta ahora: camino_mas 🟌
 						  camino_escalas 🟌
 						  itinerario 🟌🟌
-						  centralidad 🟌🟌🟌 (Falla)
 						  nueva_aerolinea 🟌🟌
+						  vacaciones 🟌🟌🟌
 						  centralidad_aprox 🟌
 """
 
 #aeropuertos.csv formato: ciudad,codigo_aeropuerto,latitud,longitud
 #vuelos.csv formato aeropuerto_i,aeropuerto_j,tiempo_promedio,precio,cant_vuelos_entre_aeropuertos
 
-COMANDOS = ["listar_operaciones", "camino_mas", "camino_escalas", "centralidad", "itinerario", "nueva_aerolinea", "centralidad_aprox"]
+COMANDOS = ["camino_mas", "camino_escalas", "itinerario", "nueva_aerolinea", "centralidad_aprox", "vacaciones"]
+
+def vacaciones(vuelos, aeropuertos, origen, k):
+	n = int(k)
+	camino = []
+	for a_origen in aeropuertos[origen]:
+		visitados = set()
+		camino = []
+		if ciclo_vacaciones(vuelos, a_origen, visitados, camino, n, 1):
+			break
+	if len(camino) <= n:
+		print("No se encontro recorrido")
+		return
+	print(" -> ".join(camino))
 
 def centralidad_aprox(vuelos, k):
 	n = int(k)
@@ -67,18 +81,6 @@ def itinerario(aeropuertos, vuelos, archivo):
 		if camino_minimo != None:
 			print(camino_minimo) #Imprimo el camino en escalas
 	
-def centralidad(vuelos, k): #k la cantidad de aeropuertos mas importantes a mostrar
-	"""Tendira que imprimir los aeropuertos mas importantes, pero no funciona del todo bien"""
-	n = int(k)
-	centralidades = centralidad_biblioteca(vuelos)
-	#print(centralidades)
-	centralidades_ordenadas = sorted(centralidades, key=lambda i: centralidades[i]) #Ordeno el diccionario por valor, lo saque de stack overflow asi que esto puede ser lo q este fallando
-	centralidades_ordenadas.reverse()
-	#print("\n" * 2)
-	#print(centralidades_ordenadas)
-	for i in range(n):
-		print(centralidades_ordenadas[i], end = ", ")
-	
 def camino_escalas(aeropuertos, vuelos, origen, destino):
 	"""Similar a camino_mas, pero en este caso la lista es segun la menor cantidad de escalas"""
 	minimo = []
@@ -89,10 +91,8 @@ def camino_escalas(aeropuertos, vuelos, origen, destino):
 				minimo = (orden, padre, aeropuerto_origen, aeropuerto_destino)
 	camino = [minimo[3]]
 	while camino[0] != minimo[2]:
-		#print(camino)
 		aer = (minimo[1])[camino[0]]
 		camino.insert(0, aer)
-		#print(camino)
 	resultado = " -> ".join(camino)
 	print(resultado)
 
@@ -106,10 +106,8 @@ def camino_mas(aeropuertos, vuelos, filtro, origen, destino):
 				minimo = (dist, padre, aeropuerto_origen, aeropuerto_destino)
 	camino = [minimo[3]]
 	while minimo[2] != camino[0]:
-		#print(camino)
 		aer = (minimo[1])[camino[0]]
 		camino.insert(0, aer)
-		#print(camino)
 	resultado = " -> ".join(camino)
 	print(resultado)
 
@@ -139,14 +137,14 @@ def procesar_comandos(comandos, parametros, aeropuertos, vuelos):
 		return camino_mas(aeropuertos, vuelos, parametros[0], parametros[1], parametros[2])
 	if comandos[0] == "camino_escalas":
 		return camino_escalas(aeropuertos, vuelos, parametros[0], parametros[1])
-	if comandos[0] == "centralidad":
-		return centralidad(vuelos, parametros[0])
 	if comandos[0] == "itinerario":
 		return itinerario(aeropuertos, vuelos, parametros[0])
 	if comandos[0] == "nueva_aerolinea":
 		return nueva_aerolinea(vuelos, parametros[0])
 	if comandos[0] == "centralidad_aprox":
 		return centralidad_aprox(vuelos, parametros[0])
+	if comandos[0] == "vacaciones":
+		return vacaciones(vuelos, aeropuertos, parametros[0], parametros[1])
 
 def main():
 	aeropuertos = procesar_aeropuertos()
