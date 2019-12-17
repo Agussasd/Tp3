@@ -1,8 +1,7 @@
 import csv
 import sys
 from grafo import Grafo
-from biblioteca import dijkstra, bfs, centralidad_biblioteca, mst_prim, orden_topologico
-from heapq import heapify, heappush, heappop #Heappush encola, heappop desencola del heap
+from biblioteca import dijkstra, bfs, centralidad_biblioteca, mst_prim, orden_topologico, random_walk
 
 #peso = [int(tiempo_promedio), int(precio), int(cant_vuelos)]
 
@@ -12,13 +11,26 @@ from heapq import heapify, heappush, heappop #Heappush encola, heappop desencola
 						  itinerario 🟌🟌
 						  centralidad 🟌🟌🟌 (Falla)
 						  nueva_aerolinea 🟌🟌
+						  centralidad_aprox 🟌
 """
 
 #aeropuertos.csv formato: ciudad,codigo_aeropuerto,latitud,longitud
 #vuelos.csv formato aeropuerto_i,aeropuerto_j,tiempo_promedio,precio,cant_vuelos_entre_aeropuertos
 
-COMANDOS = ["listar_operaciones", "camino_mas", "camino_escalas", "centralidad", "itinerario", "nueva_aerolinea"]
+COMANDOS = ["listar_operaciones", "camino_mas", "camino_escalas", "centralidad", "itinerario", "nueva_aerolinea", "centralidad_aprox"]
 
+def centralidad_aprox(vuelos, k):
+	n = int(k)
+	centralidad = {}
+	for v in vuelos:
+		centralidad[v] = 0
+	for i in range(1500):
+		recorrido = random_walk(vuelos, 500)
+		for v in recorrido:
+			centralidad[v] += 1
+	centralidades_ordenadas = sorted(centralidad, key=lambda i: centralidad[i])
+	centralidades_ordenadas.reverse()
+	print(", ".join(centralidades_ordenadas[:n]))
 
 def nueva_aerolinea(vuelos, archivo):
 	"""Recibe los vuelos y un archivo a escribir y debe devolver un archivo nuevo con una aerolinea que conecte a todos los aeropuertos con el minimo costo (peso)"""
@@ -133,6 +145,8 @@ def procesar_comandos(comandos, parametros, aeropuertos, vuelos):
 		return itinerario(aeropuertos, vuelos, parametros[0])
 	if comandos[0] == "nueva_aerolinea":
 		return nueva_aerolinea(vuelos, parametros[0])
+	if comandos[0] == "centralidad_aprox":
+		return centralidad_aprox(vuelos, parametros[0])
 
 def main():
 	aeropuertos = procesar_aeropuertos()
