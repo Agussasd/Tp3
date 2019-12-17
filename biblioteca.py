@@ -1,10 +1,22 @@
 from grafo import Grafo
-from tdas import Cola
+from tdas import Cola, Pila
 from heapq import heapify, heappush, heappop #Heappush encola, heappop desencola del heap
 import random
-from tdas import Pila
 
 INFINITO = float("inf")
+
+def _random_walk(grafo, n, i, recorrido, origen):
+	if i >= n:
+		return
+	recorrido.append(origen)
+	proximo = random.choice(grafo.adyacentes(origen))
+	_random_walk(grafo, n, i + 1, recorrido, proximo)
+
+def random_walk(grafo, n):
+	origen = grafo.vertice_random()
+	recorrido = []
+	_random_walk(grafo, n, 0, recorrido, origen)
+	return recorrido
 
 def mst_prim(grafo):
 	"""Recibe un grafo y devuelve un arbol de tendido minimo"""
