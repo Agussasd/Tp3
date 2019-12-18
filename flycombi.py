@@ -22,16 +22,15 @@ COMANDOS = ["camino_mas", "camino_escalas", "itinerario", "nueva_aerolinea", "ce
 
 def vacaciones(vuelos, aeropuertos, origen, k):
 	n = int(k)
-	camino = []
+	visitados = []
 	for a_origen in aeropuertos[origen]:
-		visitados = set()
-		camino = []
-		if ciclo_vacaciones(vuelos, a_origen, visitados, camino, n, 1):
+		if ciclo_vacaciones(vuelos, a_origen, a_origen, visitados, n, 0):
 			break
-	if len(camino) <= n:
+	if len(visitados) == 0:
 		print("No se encontro recorrido")
 		return
-	print(" -> ".join(camino))
+	visitados.append(a_origen)
+	print(" -> ".join(visitados))
 
 def centralidad_aprox(vuelos, k):
 	n = int(k)
@@ -49,17 +48,15 @@ def centralidad_aprox(vuelos, k):
 def nueva_aerolinea(vuelos, archivo):
 	"""Recibe los vuelos y un archivo a escribir y debe devolver un archivo nuevo con una aerolinea que conecte a todos los aeropuertos con el minimo costo (peso)"""
 	mst = mst_prim(vuelos) #Necesito un arbol de tendido minimo porque me piden que el peso tiene que ser el minimo posible
-	with open(archivo, "w") as archivo:
-		visitados = []
+	with open(archivo, 'w') as archivo:
 		for v in mst:
-			visitados.append(v)
+			visitados = set()
 			for w in mst.adyacentes(v):
-				if w in visitados:
+				if w in visitados: 
 					continue
-				tiempo_promedio, precio, cant_vuelos = mst.peso(v, w)
-				linea = ",".join([v, w, str(tiempo_promedio), str(precio), str(cant_vuelos)])
-				archivo.write(linea + "\n")
-	print("OK")
+				archivo.write('{},{},{},{},{}\n'.format(v, w, mst.peso(v, w)[0], mst.peso(v, w)[1], mst.peso(v, w)[2]))
+				visitados.add(w)
+	print('OK')
 
 def itinerario(aeropuertos, vuelos, archivo):
 	"""Imprime el orden en el que deben visitarse las ciudades que se pasan como archivo, y el camino minimo en tiempo"""
