@@ -5,13 +5,35 @@ import random
 
 INFINITO = float("inf")
 
+def centralidad_biblioteca(grafo):
+	cent = {}
+	for v in grafo:
+		cent[v] = 0
+	for v in grafo:
+		distancias, padres = dijkstra(grafo, v, None, 2, True)
+		cent_aux = {}
+		for w in grafo:
+			cent_aux[w] = 0
+		vertices_ordenados = sorted(distancias, key=lambda i: distancias[i]) #Ordeno el diccionario de distancias por valores
+		vertices_ordenados.reverse() 
+		for w in vertices_ordenados:
+			if not padres[w]:
+				continue
+			cent_aux[padres[w]] += 1 + cent_aux[w]
+		for w in grafo:
+			if w == v:
+				continue
+			cent[w] += cent_aux[w]
+	return cent
+
 def ciclo_vacaciones(grafo, origen, v, visitados, n, corte):
+	print(visitados)
 	if corte > n:
 		return False
 	if v in visitados:
 		return False
 	visitados.append(v)
-	if corte == n:
+	if corte == n :
 		return True
 	for w in grafo.adyacentes(v):
 		if w not in visitados:
@@ -103,7 +125,7 @@ def bfs(grafo, origen, destino):
 				cola.encolar(w)
 	return padres, orden
 
-def dijkstra(grafo, origen, destino, peso):
+def dijkstra(grafo, origen, destino, peso, calculo_centralidad):
 	dist = {}
 	padre = {}
 	for v in grafo: 
@@ -113,13 +135,19 @@ def dijkstra(grafo, origen, destino, peso):
 	q = [] #Este seria mi "heap"
 	heappush(q, (dist[origen], origen))
 	while len(q) > 0:
-		v = heappop(q)[1]
+		distancia_v, v = heappop(q)
 		if destino == v:
-			if v == destino: 
-				break
+			break
 		for w in grafo.adyacentes(v):
-			if dist[w] == INFINITO or dist[v] + (grafo.peso(v, w))[peso] < dist[w]:
-				dist[w] = dist[v] + (grafo.peso(v, w))[peso]
-				padre[w] = v
-				heappush(q, (dist[w], w))
+			if not calculo_centralidad:
+				if dist[w] == INFINITO or dist[v] + (grafo.peso(v, w))[peso] < dist[w]:
+					dist[w] = dist[v] + (grafo.peso(v, w))[peso]
+					padre[w] = v
+					heappush(q, (dist[w], w))
+			if calculo_centralidad:
+				sumando = (1 / grafo.peso(v, w)[peso])
+				if distancia_v + sumando < dist[w]:
+					dist[w] = distancia_v + sumando
+					padre[w] = v
+					heappush(q, (dist[w], w))
 	return dist, padre
