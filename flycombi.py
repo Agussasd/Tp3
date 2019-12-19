@@ -3,7 +3,7 @@
 import csv
 import sys
 from grafo import Grafo
-from biblioteca import dijkstra, bfs,  mst_prim, orden_topologico, random_walk, ciclo_vacaciones
+from biblioteca import dijkstra, bfs,  mst_prim, orden_topologico, random_walk, ciclo_vacaciones, centralidad_biblioteca
 
 #peso = [int(tiempo_promedio), int(precio), int(cant_vuelos)]
 
@@ -13,12 +13,24 @@ from biblioteca import dijkstra, bfs,  mst_prim, orden_topologico, random_walk, 
 						  nueva_aerolinea 🟌🟌
 						  vacaciones 🟌🟌🟌
 						  centralidad_aprox 🟌
+						  centralidad 🟌🟌🟌
 """
 
 #aeropuertos.csv formato: ciudad,codigo_aeropuerto,latitud,longitud
 #vuelos.csv formato aeropuerto_i,aeropuerto_j,tiempo_promedio,precio,cant_vuelos_entre_aeropuertos
 
-COMANDOS = ["camino_mas", "camino_escalas", "itinerario", "nueva_aerolinea", "centralidad_aprox", "vacaciones"]
+COMANDOS = ["camino_mas", "camino_escalas", "itinerario", "nueva_aerolinea", "centralidad_aprox", "vacaciones", "centralidad"]
+
+def centralidad(vuelos, k): #k la cantidad de aeropuertos mas importantes a mostrar
+	"""Tendira que imprimir los aeropuertos mas importantes, pero no funciona del todo bien"""
+	n = int(k)
+	centralidades = centralidad_biblioteca(vuelos)
+	#print(centralidades)
+	centralidades_ordenadas = sorted(centralidades, key=lambda i: centralidades[i]) #Ordeno el diccionario por valor, lo saque de stack overflow asi que esto puede ser lo q este fallando
+	centralidades_ordenadas.reverse()
+	#print("\n" * 2)
+	#print(centralidades_ordenadas)
+	print(", ".join(centralidades_ordenadas[:n]))
 
 def vacaciones(vuelos, aeropuertos, origen, k):
 	n = int(k)
@@ -98,7 +110,7 @@ def camino_mas(aeropuertos, vuelos, filtro, origen, destino):
 	minimo = []
 	for aeropuerto_origen in aeropuertos[origen]:
 		for aeropuerto_destino in aeropuertos[destino]:
-			dist, padre = dijkstra(vuelos, aeropuerto_origen, aeropuerto_destino, 1 if filtro == "barato" else 0) #Uso esta funcion para encontrar el camino_minimo, si el filtro es barato el peso es 1, en otro caso 0
+			dist, padre = dijkstra(vuelos, aeropuerto_origen, aeropuerto_destino, 1 if filtro == "barato" else 0, False) #Uso esta funcion para encontrar el camino_minimo, si el filtro es barato el peso es 1, en otro caso 0
 			if len(minimo) == 0 or (dist[aeropuerto_destino] < (minimo[0])[minimo[3]]):
 				minimo = (dist, padre, aeropuerto_origen, aeropuerto_destino)
 	camino = [minimo[3]]
@@ -142,6 +154,8 @@ def procesar_comandos(comandos, parametros, aeropuertos, vuelos):
 		return centralidad_aprox(vuelos, parametros[0])
 	if comandos[0] == "vacaciones":
 		return vacaciones(vuelos, aeropuertos, parametros[0], parametros[1])
+	if comandos[0] == "centralidad":
+		return centralidad(vuelos, parametros[0])
 
 def main():
 	aeropuertos = procesar_aeropuertos()
